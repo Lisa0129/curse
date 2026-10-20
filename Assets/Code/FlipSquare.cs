@@ -5,10 +5,11 @@ using System.Linq;
 
 public class FlipSquare : MonoBehaviour
 {
+    public GameManager gameManager;
     public ClickSquare clickSquare;
     public Button[] SquareButton; //方塊按鈕
-    public Sprite upSprite; //凸起的方塊圖片
-    public Sprite downSprite; //凹下的方塊圖片
+    public GameObject[] upSprite; //凸起的方塊圖片
+    public GameObject[] downSprite; //凹下的方塊圖片
     public Image[] GoalImage; //目標方塊圖片
     public Sprite upGoalSprite; //凸起的目標方塊圖片
     public Sprite downGoalSprite; //凹下的目標方塊圖片
@@ -33,10 +34,15 @@ public class FlipSquare : MonoBehaviour
             SquareState[i] = Random.Range(0, 2);
 
             // 根據狀態設定圖片
-            if (SquareState[i] == 0)
-                SquareButton[i].image.sprite = upSprite;
+            if (SquareState[i] == 0){
+                upSprite[i].SetActive(true);
+                downSprite[i].SetActive(false);
+                }
             else
-                SquareButton[i].image.sprite = downSprite;
+            {
+                downSprite[i].SetActive(true);
+                upSprite[i].SetActive(false);
+            }
         }
         // 先全部設為不變 (2)
         for (int i = 0; i < Goal.Length; i++)//設定目標
@@ -75,13 +81,15 @@ public class FlipSquare : MonoBehaviour
 
     void beUP() //方塊變凸起
     {
-        SquareButton[FlipSquareNum].image.sprite = upSprite;
+        downSprite[FlipSquareNum].SetActive(false);
+        upSprite[FlipSquareNum].SetActive(true);
         SquareState[FlipSquareNum] = 0;
     }
 
     void beDown() //方塊變凹下
     {
-        SquareButton[FlipSquareNum].image.sprite = downSprite;
+        downSprite[FlipSquareNum].SetActive(true);
+        upSprite[FlipSquareNum].SetActive(false);
         SquareState[FlipSquareNum] = 1;
     }
 
@@ -296,6 +304,8 @@ public class FlipSquare : MonoBehaviour
         if (isGoalAchieved)
         {
             Debug.Log("恭喜達成目標！");
+            gameManager = FindFirstObjectByType<GameManager>();
+            gameManager.NewRound();
             // 在這裡可以添加達成目標後的處理邏輯，例如顯示提示、進入下一關等
         }
     }

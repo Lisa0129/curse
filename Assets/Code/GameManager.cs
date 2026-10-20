@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
         if(steps <= 0)
         {
             Debug.Log("Game Over");
-            //NewRound();
+            NewRound();
         }
     }
 }
