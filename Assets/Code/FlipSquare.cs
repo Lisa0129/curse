@@ -10,9 +10,12 @@ public class FlipSquare : MonoBehaviour
     public Button[] SquareButton; //方塊按鈕
     public GameObject[] upSprite; //凸起的方塊圖片
     public GameObject[] downSprite; //凹下的方塊圖片
-    public Image[] GoalImage; //目標方塊圖片
-    public Sprite upGoalSprite; //凸起的目標方塊圖片
-    public Sprite downGoalSprite; //凹下的目標方塊圖片
+    public Image[] UPGoalImage; //凸起時目標方塊圖片
+    public Image[] DOWNGoalImage; //凹下時目標方塊圖片
+    public Sprite upsunGoalSprite; //凸起的太陽目標方塊圖片
+    public Sprite downsunGoalSprite; //凹下的太陽目標方塊圖片
+    public Sprite upmoonGoalSprite; //凸起的月亮目標方塊圖片
+    public Sprite downmoonGoalSprite; //凹下的月亮目標方塊圖片
     public int[] SquareState; //方塊狀態，0為凸起，1為凹下
     public int Numberclicksquare; //點擊方塊編號
     public int FlipSquareNum; //翻轉方塊編號
@@ -48,7 +51,8 @@ public class FlipSquare : MonoBehaviour
         for (int i = 0; i < Goal.Length; i++)//設定目標
         {
             Goal[i] = 2;
-            GoalImage[i].gameObject.SetActive(false);
+            UPGoalImage[i].gameObject.SetActive(false);
+            DOWNGoalImage[i].gameObject.SetActive(false);
         }
         int[] result = Enumerable.Range(0, 25)   // 0~24
                                  .OrderBy(x => Random.value) // 打亂
@@ -60,16 +64,32 @@ public class FlipSquare : MonoBehaviour
         {
             int idx = result[i];
             Goal[idx] = 0;
-            GoalImage[idx].sprite = upGoalSprite;
-            GoalImage[idx].gameObject.SetActive(true);
+            UPGoalImage[idx].sprite = upsunGoalSprite;
+            DOWNGoalImage[idx].sprite = downsunGoalSprite;
+            if (SquareState[idx] == 0)
+            {
+                UPGoalImage[idx].gameObject.SetActive(true);
+            }
+            else
+            {
+                DOWNGoalImage[idx].gameObject.SetActive(true);
+            }
         }
 
         for (int i = 5; i < 10; i++)
         {
             int idx = result[i];
             Goal[idx] = 1;
-            GoalImage[idx].sprite = downGoalSprite;
-            GoalImage[idx].gameObject.SetActive(true);
+            UPGoalImage[idx].sprite = upmoonGoalSprite;
+            DOWNGoalImage[idx].sprite = downmoonGoalSprite;
+            if (SquareState[idx] == 0)
+            {
+                UPGoalImage[idx].gameObject.SetActive(true);
+            }
+            else
+            {
+                DOWNGoalImage[idx].gameObject.SetActive(true);
+            }
         }
 
         // Debug 顯示結果
@@ -84,6 +104,11 @@ public class FlipSquare : MonoBehaviour
         downSprite[FlipSquareNum].SetActive(false);
         upSprite[FlipSquareNum].SetActive(true);
         SquareState[FlipSquareNum] = 0;
+        if(Goal[FlipSquareNum] < 2)
+        {
+            UPGoalImage[FlipSquareNum].gameObject.SetActive(true);
+        DOWNGoalImage[FlipSquareNum].gameObject.SetActive(false);
+        }
     }
 
     void beDown() //方塊變凹下
@@ -91,6 +116,11 @@ public class FlipSquare : MonoBehaviour
         downSprite[FlipSquareNum].SetActive(true);
         upSprite[FlipSquareNum].SetActive(false);
         SquareState[FlipSquareNum] = 1;
+        if(Goal[FlipSquareNum] < 2)
+        {
+            UPGoalImage[FlipSquareNum].gameObject.SetActive(false);
+        DOWNGoalImage[FlipSquareNum].gameObject.SetActive(true);
+        }
     }
 
     void UPorDown() //判斷方塊變換狀態
@@ -305,7 +335,7 @@ public class FlipSquare : MonoBehaviour
         {
             Debug.Log("恭喜達成目標！");
             gameManager = FindFirstObjectByType<GameManager>();
-            gameManager.NewRound();
+            gameManager.endGame();
             // 在這裡可以添加達成目標後的處理邏輯，例如顯示提示、進入下一關等
         }
     }
