@@ -2,6 +2,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using System.Collections.Generic;
 
 public class FlipSquare : MonoBehaviour
 {
@@ -21,11 +22,12 @@ public class FlipSquare : MonoBehaviour
     public int FlipSquareNum; //翻轉方塊編號
     public int[] Goal; //所有方塊的目標狀態，0為凸起，1為凹下，2為不變
     public int Goalamount; //目標方塊數量
+    public bool Tool1use = false; //是否使用道具1
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     public void ReClean()//重新清理方塊狀態
@@ -37,10 +39,11 @@ public class FlipSquare : MonoBehaviour
             SquareState[i] = Random.Range(0, 2);
 
             // 根據狀態設定圖片
-            if (SquareState[i] == 0){
+            if (SquareState[i] == 0)
+            {
                 upSprite[i].SetActive(true);
                 downSprite[i].SetActive(false);
-                }
+            }
             else
             {
                 downSprite[i].SetActive(true);
@@ -104,10 +107,10 @@ public class FlipSquare : MonoBehaviour
         downSprite[FlipSquareNum].SetActive(false);
         upSprite[FlipSquareNum].SetActive(true);
         SquareState[FlipSquareNum] = 0;
-        if(Goal[FlipSquareNum] < 2)
+        if (Goal[FlipSquareNum] < 2)
         {
             UPGoalImage[FlipSquareNum].gameObject.SetActive(true);
-        DOWNGoalImage[FlipSquareNum].gameObject.SetActive(false);
+            DOWNGoalImage[FlipSquareNum].gameObject.SetActive(false);
         }
     }
 
@@ -116,10 +119,10 @@ public class FlipSquare : MonoBehaviour
         downSprite[FlipSquareNum].SetActive(true);
         upSprite[FlipSquareNum].SetActive(false);
         SquareState[FlipSquareNum] = 1;
-        if(Goal[FlipSquareNum] < 2)
+        if (Goal[FlipSquareNum] < 2)
         {
             UPGoalImage[FlipSquareNum].gameObject.SetActive(false);
-        DOWNGoalImage[FlipSquareNum].gameObject.SetActive(true);
+            DOWNGoalImage[FlipSquareNum].gameObject.SetActive(true);
         }
     }
 
@@ -135,188 +138,305 @@ public class FlipSquare : MonoBehaviour
         }
     }
 
+    public void Tool1()
+    {
+        Tool1use = true;
+    }
+
+    public void Tool2()
+    {
+        List<int> wrongSquares = new List<int>();
+
+        // 找出所有錯誤的目標方塊
+        for (int i = 0; i < Goal.Length; i++)
+        {
+            if (Goal[i] != 2 && SquareState[i] != Goal[i])
+            {
+                wrongSquares.Add(i);
+            }
+        }
+
+        // 沒有錯誤方塊
+        if (wrongSquares.Count == 0)
+        {
+            Debug.Log("沒有需要修正的方塊");
+            return;
+        }
+
+        // 打亂順序
+        wrongSquares = wrongSquares
+            .OrderBy(x => Random.value)
+            .ToList();
+
+        // 最多修正3個
+        int fixCount = Mathf.Min(3, wrongSquares.Count);
+
+        for (int i = 0; i < fixCount; i++)
+        {
+            int index = wrongSquares[i];
+
+            FlipSquareNum = index;
+            UPorDown();
+            
+
+            Debug.Log($"道具修正方塊：{index}");
+        }
+
+        CheckGoal();
+    }
+
     public void Flip() //翻轉方塊
     {
         clickSquare = FindFirstObjectByType<ClickSquare>();
         Numberclicksquare = clickSquare.clicksquareNumber;
-        if(Numberclicksquare < 5)
+        if (Tool1use)
         {
-            if(Numberclicksquare == 0)
+            Tool1use = false;
+            FlipSquareNum = Numberclicksquare;
+            UPorDown();
+        }
+        else
+        {
+            if (Numberclicksquare < 5)
             {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
+                if (Numberclicksquare == 0)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare > 0 && Numberclicksquare < 4)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare == 4)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
             }
-            else if(Numberclicksquare > 0 && Numberclicksquare < 4)
+            else if (Numberclicksquare >= 5 && Numberclicksquare <= 9)
             {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
+                if (Numberclicksquare == 5)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare > 5 && Numberclicksquare < 9)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare == 9)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
             }
-            else if(Numberclicksquare == 4)
+            else if (Numberclicksquare >= 10 && Numberclicksquare <= 14)
             {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
+                if (Numberclicksquare == 10)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare > 10 && Numberclicksquare < 14)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare == 14)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+            }
+            else if (Numberclicksquare >= 15 && Numberclicksquare <= 19)
+            {
+                if (Numberclicksquare == 15)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare > 15 && Numberclicksquare < 19)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare == 19)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 5;
+                    UPorDown();
+                }
+            }
+            else if (Numberclicksquare >= 20 && Numberclicksquare <= 24)
+            {
+                if (Numberclicksquare == 20)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                }
+                else if (Numberclicksquare > 20 && Numberclicksquare < 24)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare + 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                }
+                else if (Numberclicksquare == 24)
+                {
+                    FlipSquareNum = Numberclicksquare;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 1;
+                    UPorDown();
+                    FlipSquareNum = Numberclicksquare - 5;
+                    UPorDown();
+                }
             }
         }
-        else if(Numberclicksquare >= 5 && Numberclicksquare <= 9)
+    }
+
+
+    public void GhostTime() //怨靈時間
+    {
+        int num = Random.Range(0, 9);
+        int ghostSquareNum;
+        if (num == 0)
         {
-            if(Numberclicksquare == 5)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare > 5 && Numberclicksquare < 9)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare == 9)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
+            ghostSquareNum = 6;
         }
-        else if(Numberclicksquare >= 10 && Numberclicksquare <= 14)
+        else if (num == 1)
         {
-            if(Numberclicksquare == 10)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare > 10 && Numberclicksquare < 14)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare == 14)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
+            ghostSquareNum = 7;
         }
-        else if(Numberclicksquare >= 15 && Numberclicksquare <= 19)
+        else if (num == 2)
         {
-            if(Numberclicksquare == 15)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare > 15 && Numberclicksquare < 19)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare == 19)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 5;
-                UPorDown();
-            }
+            ghostSquareNum = 8;
         }
-        else if (Numberclicksquare >= 20 && Numberclicksquare <= 24)
+        else if (num == 3)
         {
-            if(Numberclicksquare == 20)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-            }
-            else if(Numberclicksquare > 20 && Numberclicksquare < 24)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare + 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-            }
-            else if(Numberclicksquare == 24)
-            {
-                FlipSquareNum = Numberclicksquare;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 1;
-                UPorDown();
-                FlipSquareNum = Numberclicksquare - 5;
-                UPorDown();
-            }
+            ghostSquareNum = 11;
         }
+        else if (num == 4)
+        {
+            ghostSquareNum = 12;
+        }
+        else if (num == 5)
+        {
+            ghostSquareNum = 13;
+        }
+        else if (num == 6)
+        {
+            ghostSquareNum = 16;
+        }
+        else if (num == 7)
+        {
+            ghostSquareNum = 17;
+        }
+        else
+        {
+            ghostSquareNum = 18;
+        }
+        FlipSquareNum = ghostSquareNum - 6;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum - 5;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum - 4;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum - 1;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum + 1;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum + 4;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum + 5;
+        UPorDown();
+        FlipSquareNum = ghostSquareNum + 6;
+        UPorDown();
     }
 
     public void CheckGoal() //檢查是否達成目標
@@ -344,6 +464,6 @@ public class FlipSquare : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
