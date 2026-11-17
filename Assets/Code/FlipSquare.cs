@@ -455,6 +455,7 @@ public class FlipSquare : MonoBehaviour
         {
             Debug.Log("恭喜達成目標！");
             gameManager = FindFirstObjectByType<GameManager>();
+            gameManager.Win = true;
             gameManager.endGame();
             // 在這裡可以添加達成目標後的處理邏輯，例如顯示提示、進入下一關等
         }
