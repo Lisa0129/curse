@@ -6,13 +6,14 @@ public class GameManager : MonoBehaviour
 {
     public int steps; //剩餘使用步數
     public TextMeshProUGUI stepsText; //顯示剩餘步數的文字
-    public bool Win;
-    public int ThisPoint; //本局分數
+    public bool Win = false; //是否勝利
+    //public int ThisPoint; //本局分數
     public TextMeshProUGUI ThisPointText; //顯示本局分數的文字
     public int point; //分數
     public TextMeshProUGUI pointText; //顯示分數的文字
     public FlipSquare flipSquare;
-    public float ghostTime = 60f;
+    public int TimeLevel = 1; //時間等級
+    public float ghostTime = 40f;
     public TextMeshProUGUI TimeText; //顯示剩餘時間的文字
     public bool isGhostTime = false; //是否進入怨靈時間
     public GameObject endGamePanel; //遊戲結束面板
@@ -45,44 +46,60 @@ public class GameManager : MonoBehaviour
     public void NewRound()
     {
         endGamePanel.SetActive(false);
+        AddPoint();
         Time.timeScale = 1f; //恢復遊戲
         steps = 20;
         stepsText.text = steps.ToString();
-        ghostTime = 60f;
+        if (TimeLevel == 1)
+        {
+            ghostTime = 40f;
+        }
+        else if (TimeLevel == 2)
+        {
+            ghostTime = 30f;
+        }
+        else if (TimeLevel == 3)
+        {
+            ghostTime = 20f;
+        }
+        else if(TimeLevel == 4)
+        {
+            ghostTime = 10f;
+        }
         isGhostTime = false;
+        if (TimeLevel < 4)
+        {
+            TimeLevel++;
+        }
         flipSquare = FindFirstObjectByType<FlipSquare>();
         flipSquare.ReClean();
     }
 
-    public void countPoint()
-    {
-        if (Win)
-        {
-            ThisPoint = 100 + (steps * 2);
-        }
-        else
-        {
-            ThisPoint = 0;
-        }
-        ThisPointText.text = ThisPoint.ToString();
-    }
 
     public void AddPoint()
     {
-        point = point + ThisPoint;
+        if (Win)
+        {
+            point = point + 100 + (steps * 2);
+        }
+        else
+        {
+            point =  0;
+        }
         pointText.text = point.ToString();
     }
 
     public void endGame()
     {
         Debug.Log("Game Over");
-        countPoint();
+        ThisPointText.text = point.ToString();
         endGamePanel.SetActive(true);
         Time.timeScale = 0f; //暫停遊戲
     }
 
     public void NextRound()
     {
+        TimeLevel = 1; // 重置時間等級
         AddPoint();
         NewRound();
     }
