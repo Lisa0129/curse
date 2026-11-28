@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,8 +13,9 @@ public class GameManager : MonoBehaviour
     public int point; //分數
     public TextMeshProUGUI pointText; //顯示分數的文字
     public FlipSquare flipSquare;
+    public bool TimeStop; //是否暫停時間
     public int TimeLevel = 1; //時間等級
-    public float ghostTime = 40f;
+    public float ghostTime = 10f;
     public TextMeshProUGUI TimeText; //顯示剩餘時間的文字
     public bool isGhostTime = false; //是否進入怨靈時間
     public GameObject endGamePanel; //遊戲結束面板
@@ -26,14 +28,14 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (ghostTime > 0)
+        if (ghostTime > 0 && !TimeStop)
         {
             ghostTime -= Time.deltaTime;
             TimeText.text = Mathf.CeilToInt(ghostTime).ToString();
         }
         else
         {
-            if (!isGhostTime)
+            if (!isGhostTime && !TimeStop)
             {
                 TimeText.text = "0";
                 isGhostTime = true;
@@ -43,36 +45,56 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void NewRound()
+    IEnumerator BeforeNew()
     {
-        endGamePanel.SetActive(false);
-        AddPoint();
+        yield return new WaitForSeconds(2f);
+        flipSquare = FindFirstObjectByType<FlipSquare>();
+        flipSquare.ReClean();
+        TimeStop = false;
+        
+    }
+
+    public void NewRound() //刷新
+    {
         Time.timeScale = 1f; //恢復遊戲
+        TimeStop = true;
+        endGamePanel.SetActive(false);
+        flipSquare = FindFirstObjectByType<FlipSquare>();
+        flipSquare.BeforeClean();
+        StartCoroutine(BeforeNew());
+        AddPoint();
         steps = 20;
         stepsText.text = steps.ToString();
         if (TimeLevel == 1)
         {
-            ghostTime = 40f;
+            ghostTime = 10f;
         }
         else if (TimeLevel == 2)
         {
-            ghostTime = 30f;
+            ghostTime = 9f;
         }
         else if (TimeLevel == 3)
         {
-            ghostTime = 20f;
+            ghostTime = 8f;
         }
-        else if(TimeLevel == 4)
+        else if (TimeLevel == 4)
         {
-            ghostTime = 10f;
+            ghostTime = 7f;
+        }
+        else if (TimeLevel == 5)
+        {
+            ghostTime = 6f;
+        }
+        else if (TimeLevel == 6)
+        {
+            ghostTime = 5f;
         }
         isGhostTime = false;
-        if (TimeLevel < 4)
+        if (TimeLevel < 6)
         {
             TimeLevel++;
         }
-        flipSquare = FindFirstObjectByType<FlipSquare>();
-        flipSquare.ReClean();
+        
     }
 
 
@@ -84,7 +106,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            point =  0;
+            point = 0;
         }
         pointText.text = point.ToString();
     }
@@ -97,7 +119,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f; //暫停遊戲
     }
 
-    public void NextRound()
+    public void NextRound()//下一局
     {
         TimeLevel = 1; // 重置時間等級
         AddPoint();
@@ -119,7 +141,7 @@ public class GameManager : MonoBehaviour
 
     public void Tool3()
     {
-        if(ghostTime > 0)
+        if (ghostTime > 0)
         {
             ghostTime = ghostTime + 5f;
         }

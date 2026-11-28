@@ -30,6 +30,24 @@ public class FlipSquare : MonoBehaviour
 
     }
 
+    public void BeforeClean()
+    {
+        // 先全部設為不變 (2)
+        for (int i = 0; i < Goal.Length; i++)//設定目標
+        {
+            Goal[i] = 2;
+            UPGoalImage[i].gameObject.SetActive(false);
+            DOWNGoalImage[i].gameObject.SetActive(false);
+        }
+        // 先全部設為凹下 (1)
+        for (int i = 0; i < SquareState.Length; i++)//設定目標
+        {
+            SquareState[i] = 1;
+            upSprite[i].SetActive(false);
+            downSprite[i].SetActive(true);
+        }
+    }
+
     public void ReClean()//重新清理方塊狀態
     {
         Goalamount = 10;
@@ -177,7 +195,7 @@ public class FlipSquare : MonoBehaviour
 
             FlipSquareNum = index;
             UPorDown();
-            
+
 
             Debug.Log($"道具修正方塊：{index}");
         }
